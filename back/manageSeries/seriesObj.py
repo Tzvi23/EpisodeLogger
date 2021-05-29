@@ -36,7 +36,15 @@ class Series:
         self.nextEpisode = None
         self.visible = True
 
+    def initialize(self):
+        # self.fetch_data() currently disabled
+        self.fetch_data_once()
+        self.adjustTimeZoneToEst()
+        self.convertDFtoJSON()  # set DF_episodes_json
+        self.setNextEpisode()
+
     def fetch_data(self):
+        msg.print_msg('Fetching data')
         # Send request
         r = requests.get(url=URL + self.permaLink)
         # Update lastDbUpdate
@@ -45,6 +53,7 @@ class Series:
         data = r.json()
         self.data = data['tvShow']
         self.countDown = self.data['countdown']
+        msg.print_msg('Done')
 
     def fetch_data_once(self):
         """
@@ -52,6 +61,7 @@ class Series:
         Send request for data and save the response as a pickle, to minimize requests
         while debugging.
         """
+        msg.print_msg('Fetching data once')
         # If file not exists do the request
         if not Path(self.name + '.pickle').exists():
             # Send request
@@ -73,17 +83,37 @@ class Series:
         self.DF_episodes = pd.DataFrame(data['tvShow']['episodes'])
         self.DF_episodes['watched'] = False  # Add column of watched status
         self.countDown = self.data['countdown']
+        msg.print_msg('Done')
 
     def adjustTimeZoneToEst(self):
         """
         When fetching the data from episodate.com the date time isn't matching to my local time
         To overcome this, this function is adjusting the time according to the correct time zone and rewrites the time stamps.
         """
+        msg.print_msg('Adjusting time zone')
         df = self.DF_episodes
         df['air_date'] = df['air_date'].apply(lambda x: ISR.localize(datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')))  # Convert to dateTime
         df['air_date'] = df['air_date'].apply(
             lambda x: EDT.normalize(x.astimezone(EDT)).strftime('%Y-%m-%d %H:%M:%S'))  # Adjust time zone and convert to string
         self.episodes = df.to_dict('records')
+        msg.print_msg('Done')
+
+    def setNextEpisode(self):
+        """
+        Setting the next episode and number of days past the air date.
+        """
+        msg.print_msg('Set next Episode')
+        self.nextEpisode = self.DF_episodes[self.DF_episodes.watched == False]
+        # Convert air date to datetime objects to compare time with now function
+        self.nextEpisode['air_date'] = self.nextEpisode['air_date'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
+        self.nextEpisode = self.nextEpisode[(self.nextEpisode['air_date'] >= (datetime.datetime.now() - datetime.timedelta(days=1))) | (self.nextEpisode['air_date'] < datetime.datetime.now())]
+        if not self.nextEpisode.empty:
+            self.nextEpisode = self.nextEpisode.sort_values(by='air_date').iloc[0].values.tolist()
+            self.nextEpisode.append((self.nextEpisode[3] - datetime.datetime.now()).days)
+            self.nextEpisode[5] = str(self.nextEpisode[5])
+        else:
+            self.nextEpisode = None
+        msg.print_msg('Set next Episode => ' + self.name + ' ' + str(self.nextEpisode))
 
     # region Convert to and from json
     def convertDFtoJSON(self):
@@ -111,6 +141,7 @@ class Series:
                 }
         }
         """
+        msg.print_msg('Convert DF to JSON')
         # Get number of season in data
         numberOfSeasons = self.DF_episodes.season.unique()
         # Base variable
@@ -119,7 +150,7 @@ class Series:
             # Get the episodes for specific season
             seasonData = self.DF_episodes.loc[self.DF_episodes['season'] == seasonNumber]
             # Drop the season column
-            seasonData.drop(['season', 'episode'], axis=1, inplace=True)
+            seasonData = seasonData.drop(['season', 'episode'], axis=1)
             # Reindex table to start from 1 instead 0
             seasonData.index = range(1, len(seasonData) + 1)
             # Convert to json
@@ -135,23 +166,20 @@ class Series:
         [dict(season, episode, name, air_date), dict(season, episode, name, air_date), ...]
         :return:
         """
+        msg.print_msg('Convert JSON to DF')
         x = flat_dict(json.loads(self.DF_episodes_json))
-        print(x)
 
     # endregion
 
 
 if __name__ == "__main__":
     x = Series(name='FBI', permaLink='fbi-cbs')
-    msg.print_msg('Fetching data')
     x.fetch_data_once()
-    msg.print_msg('Done')
     # Adjust time zone
-    msg.print_msg('Adjusting time zone')
     x.adjustTimeZoneToEst()
-    msg.print_msg('Done')
 
     x.convertDFtoJSON()
     x.convertJSONtoDF()
 
+    x.setNextEpisode()
 
