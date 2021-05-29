@@ -1,5 +1,7 @@
 # Utility class for printing messages in different colors to the terminal
 
+from datetime import datetime
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -21,9 +23,10 @@ class Stamp:
         self.color = stampColor
         self.stamp = stamp
         self.ENDC = '\033[0m'
+        self.timeColor = '\033[93m'
 
     def print_msg(self, msg):
-        print(f"{self.color}{self.stamp}{self.ENDC} | {msg}")
+        print(f"{self.color}{self.stamp}{self.ENDC} | {self.timeColor}{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}{self.ENDC} | {msg}")
 
     def setStamp(self, newStamp):
         self.stamp = newStamp
