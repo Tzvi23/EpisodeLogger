@@ -1,6 +1,11 @@
 import pymongo
 from pprint import pprint
 
+# Set up messaging class
+from misc.printColors import Stamp, bcolors
+
+msg = Stamp(stampColor=bcolors.OKCYAN, stamp='[manageDB]')
+
 # ----- Mongo DB start up ----
 startupClient = pymongo.MongoClient()
 
@@ -8,6 +13,7 @@ DATABASE_NAME = "seriesDB"
 
 
 def first_set_up():
+    msg.print_msg('First set up')
     databases = startupClient.list_database_names()
     # Check if database exists for first init
     # If not creates a database and inserts one empty collection
@@ -21,16 +27,19 @@ def first_set_up():
         print("Database exists :) ")
         return
 
+
 # region ------- Getters --------
 
 
 def getDatabases():
+    msg.print_msg('Get data bases')
     x = startupClient.list_database_names()
     print(f"Databases: {x}")
     return x
 
 
 def getCollections():
+    msg.print_msg('Get Collections')
     x = startupClient.list_database_names()
     print("Collections: ")
     for databaseName in x:
@@ -39,6 +48,7 @@ def getCollections():
 
 
 def getEntries(collectionName):
+    msg.print_msg()
     colDb = startupClient[DATABASE_NAME][collectionName]
     for entry in colDb.find():
         pprint(entry)
@@ -49,7 +59,45 @@ def getEntries(collectionName):
 # Some functions that need to be created and configured
 
 def add_user(name, password):
-    pass
+    msg.print_msg(f'Add user: {name}')
+
+    def checkName():
+        return True
+
+    def checkPassword():
+        return True
+
+    def checkCollection():
+        if name in startupClient[DATABASE_NAME].list_collection_names():
+            return True
+        return False
+
+    def checkUnique(newName):
+        usersNames = startupClient[DATABASE_NAME]["users"].find({}, {"userName": 1})  # Get just username column
+        if usersNames.count() == 1:
+            return True
+        for name in usersNames:
+            if name["userName"].lower() == newName.lower():
+                print(f"[!!] Name already exists => {newName}")
+                return False
+
+    def addUserEntry():
+        userCol = startupClient[DATABASE_NAME]
+        userCol["users"].insert_one({"userName": name, "password": password})
+        print(f"Added new user: UserName: {name}")
+
+    if not checkCollection():
+        startupClient[DATABASE_NAME].create_collection(name)  # Create new collection for the new user
+        startupClient[DATABASE_NAME][name].create_index([("permaLink", pymongo.DESCENDING)], unique=True)
+        print(f"Created new collection for {name}")
+
+    if checkName() and checkPassword():
+        try:
+            addUserEntry()
+        except pymongo.errors.DuplicateKeyError as error:
+            print("[!!ERROR!!] User not added duplicated key")
+            return False
+    return True
 
 
 def add_series():
@@ -74,5 +122,7 @@ def verifyUser(userInput):
 def updateVisibleStatus():
     pass
 
+
 if __name__ == "__main__":
-    first_set_up()
+    # first_set_up()
+    pass
