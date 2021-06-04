@@ -23,12 +23,20 @@ class Stamp:
         self.color = stampColor
         self.stamp = stamp
         self.ENDC = '\033[0m'
-        self.timeColor = '\033[93m'
+        self.timeColor = '\033[92m'
         self.ErrorColor = '\033[91m'
+        self.WarningColor = '\033[93m'
 
-    def print_msg(self, msg, error=False):
-        if error:
+    def print_msg(self, msg, error=0):
+        """
+        :param msg:
+        :param error: 0 - No Error 1 - Error 2 - Warning
+        :return:
+        """
+        if error == 1:
             print(f"{self.color}{self.stamp}{self.ENDC} | {self.timeColor}{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}{self.ENDC} | {self.ErrorColor}{msg}{self.ENDC}")
+        elif error == 2:
+            print(f"{self.color}{self.stamp}{self.ENDC} | {self.timeColor}{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}{self.ENDC} | {self.WarningColor}{msg}{self.ENDC}")
         else:
             print(f"{self.color}{self.stamp}{self.ENDC} | {self.timeColor}{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}{self.ENDC} | {msg}")
 

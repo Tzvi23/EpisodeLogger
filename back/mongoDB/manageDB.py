@@ -1,6 +1,7 @@
 import pymongo
 from pprint import pprint
 import re
+import json
 
 # Set up messaging class
 from manageSeries.seriesObj import Series
@@ -64,7 +65,7 @@ def checkCollection(username, source):
     :return: True if exists else False
     """
     if username in startupClient[DATABASE_NAME].list_collection_names():
-        msg.print_msg(f'[checkCollection][{source}] Collection for user: {username} exists', error=True)
+        msg.print_msg(f'[checkCollection][{source}] Collection for user: {username} exists', error=2)
         return True
     return False
 
@@ -170,7 +171,7 @@ def add_series(userName, seriesName, seriesPermalink, watched=False):
         msg.print_msg(f'[add_series] Collection for {userName} does not exist cannot add series')
         return False
     elif checkIfSeriesExists():
-        msg.print_msg(f'[add_series] {seriesPermalink} already in the collection. Abort.', error=True)
+        msg.print_msg(f'[add_series] {seriesPermalink} already in the collection. Abort.', error=1)
         return False
     else:
         newSeriesObj = Series(name=seriesName, permaLink=seriesPermalink)
@@ -194,7 +195,7 @@ def load_one_series(userName, seriesName=None, seriesPermalink=None):
     :return: Dictionary value
     """
     if seriesName is None and seriesPermalink is None:
-        msg.print_msg('[load_one_series] Both seriesName and permalink are None need at least one.', error=True)
+        msg.print_msg('[load_one_series] Both seriesName and permalink are None need at least one.', error=1)
         return False
     if not checkCollection(userName, 'load_one_series'):
         msg.print_msg(f'[add_series] Collection for {userName} does not exist cannot add series')
@@ -252,7 +253,7 @@ def updateVisibleStatus(userName, seriesName, visStatus):
     :param visStatus: Boolean - True/False values
     :return: Boolean - True for success / False for failure
     """
-    if not checkCollection(userName, 'load_all_series'):
+    if not checkCollection(userName, 'updateVisibleStatus'):
         msg.print_msg(f'[updateVisibleStatus] Collection for {userName} does not exist cannot add series')
         return False
 
@@ -263,7 +264,53 @@ def updateVisibleStatus(userName, seriesName, visStatus):
     msg.print_msg(f'[updateVisibleStatus] Updated visible status to: {visStatus} for series: {seriesName}')
     return True
 
+
+def updateWatchStatusForSingleEpisode(userName, seriesName, season, episode, visStatus):
+    """
+    Change watch status True/False for single episode
+    :param userName: String
+    :param seriesName: String
+    :param season: String - important format => 1 not 01
+    :param episode: String - important format => 1 not 01
+    :param visStatus: Boolean - True / False
+    :return: Success / Failure
+    """
+    if not checkCollection(userName, 'load_all_series'):
+        msg.print_msg(f'[updateWatchStatusForSingleEpisode] Collection for {userName} does not exist cannot add series')
+        return False
+
+    userCol = startupClient[DATABASE_NAME][userName]  # Get collection cursor
+    # Check if season and episode exists in the series, if not - abort
+    q = {'name': seriesName, f'DF_episodes_json_dict.{season}.{episode}.watched': {'$exists': True}}
+    if userCol.find_one(q) is None:
+        msg.print_msg('[updateWatchStatusForSingleEpisode] Bad values. Check season/episode numbers', error=1)
+        return False
+    # Update watch status for one specific episode
+    query = {'name': seriesName}
+    updateVal = {'$set': {f'DF_episodes_json_dict.{season}.{episode}.watched': visStatus}}
+    checkOp(userCol.update_one(query, updateVal), func_name='updateWatchStatusForSingleEpisode', op_name='update episode watch status DB')  # Update the DB and prints relevant status
+
+    # Update the string value representation for the json object
+    updateVal = {'$set': {f'DF_episodes_json_str': json.dumps(userCol.find_one(query)['DF_episodes_json_dict'])}}
+    checkOp(userCol.update_one(query, updateVal), func_name='updateWatchStatusForSingleEpisode',
+            op_name='update json String')  # Update the DB and prints relevant status
+
+    msg.print_msg(f'[updateWatchStatusForSingleEpisode] Updated watched status to: {visStatus} for series: {seriesName}|S:{season}|E:{episode}')
+    return True
 # endregion ------- [END] Series functions -----------------------------------------------------------------------
+
+
+def checkOp(op, func_name, op_name):
+    """
+    Printing function to indicate the status of update value in the DB
+    :param op: The update_one function result
+    :param func_name: String
+    :param op_name: String
+    """
+    if op.modified_count > 0:
+        msg.print_msg(f'[{func_name}] [{op_name}] modified DB')
+    else:
+        msg.print_msg(f'[{func_name}] [{op_name}] not modified', error=2)
 
 
 if __name__ == "__main__":
@@ -271,3 +318,4 @@ if __name__ == "__main__":
     load_one_series('tzvi_23', 'FBI')
     load_all_series('tzvi_23')
     updateVisibleStatus('tzvi_23', 'FBI', True)
+    updateWatchStatusForSingleEpisode('tzvi_23', 'FBI', '4', '1', True)
