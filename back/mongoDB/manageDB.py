@@ -203,7 +203,8 @@ def load_one_series(userName, seriesName=None, seriesPermalink=None):
     def queryDB(query):
         msg.print_msg('[load_one_series] queryDB')
         # Result query returns without the fields that are set as 0
-        return userCol.find_one(query, {"_id": 0, "lastDbUpdate": 0, "episodes": 0, "data": 0, "countDown": 0, "watched": 0})
+        return userCol.find_one(query,
+                                {"_id": 0, "lastDbUpdate": 0, "episodes": 0, "data": 0, "countDown": 0, "watched": 0})
 
     userCol = startupClient[DATABASE_NAME][userName]  # Get collection cursor
     # Query the series
@@ -231,7 +232,8 @@ def load_all_series(userName):
 
     seriesDataList = list()
     userCol = startupClient[DATABASE_NAME][userName]  # Get collection cursor
-    for series in userCol.find({}, {"_id": 0, "lastDbUpdate": 0, "episodes": 0, "data": 0, "countDown": 0, "watched": 0}):
+    for series in userCol.find({},
+                               {"_id": 0, "lastDbUpdate": 0, "episodes": 0, "data": 0, "countDown": 0, "watched": 0}):
         msg.print_msg(f"[load_all_series] Adding {series['name']} to list for user {userName}")
         seriesDataList.append(series)
     return seriesDataList
@@ -241,8 +243,25 @@ def update_series():
     pass
 
 
-def updateVisibleStatus():
-    pass
+def updateVisibleStatus(userName, seriesName, visStatus):
+    """
+    Change visible status of series.
+    To remove unwanted/finished series from display by changing the visible status.
+    :param userName: String userName collection
+    :param seriesName: String
+    :param visStatus: Boolean - True/False values
+    :return: Boolean - True for success / False for failure
+    """
+    if not checkCollection(userName, 'load_all_series'):
+        msg.print_msg(f'[updateVisibleStatus] Collection for {userName} does not exist cannot add series')
+        return False
+
+    userCol = startupClient[DATABASE_NAME][userName]  # Get collection cursor
+    query = {'name': seriesName}
+    updateVal = {'$set': {'visible': visStatus}}
+    userCol.update_one(query, updateVal)
+    msg.print_msg(f'[updateVisibleStatus] Updated visible status to: {visStatus} for series: {seriesName}')
+    return True
 
 # endregion ------- [END] Series functions -----------------------------------------------------------------------
 
@@ -251,4 +270,4 @@ if __name__ == "__main__":
     add_series('tzvi_23', 'FBI', 'fbi-cbs')
     load_one_series('tzvi_23', 'FBI')
     load_all_series('tzvi_23')
-
+    updateVisibleStatus('tzvi_23', 'FBI', True)
