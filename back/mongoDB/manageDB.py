@@ -201,6 +201,7 @@ def load_one_series(userName, seriesName=None, seriesPermalink=None):
         return False
 
     def queryDB(query):
+        msg.print_msg('[load_one_series] queryDB')
         # Result query returns without the fields that are set as 0
         return userCol.find_one(query, {"_id": 0, "lastDbUpdate": 0, "episodes": 0, "data": 0, "countDown": 0, "watched": 0})
 
@@ -217,6 +218,25 @@ def load_one_series(userName, seriesName=None, seriesPermalink=None):
         return res
 
 
+def load_all_series(userName):
+    """
+    Get all the series data from specific user collection
+    :param userName: String
+    :return: List of Dictionaries, each one contains the following data:
+    name, permalink, DF_episodes_json_str, DF_episodes_json_dict, visible
+    """
+    if not checkCollection(userName, 'load_all_series'):
+        msg.print_msg(f'[add_series] Collection for {userName} does not exist cannot add series')
+        return False
+
+    seriesDataList = list()
+    userCol = startupClient[DATABASE_NAME][userName]  # Get collection cursor
+    for series in userCol.find({}, {"_id": 0, "lastDbUpdate": 0, "episodes": 0, "data": 0, "countDown": 0, "watched": 0}):
+        msg.print_msg(f"[load_all_series] Adding {series['name']} to list for user {userName}")
+        seriesDataList.append(series)
+    return seriesDataList
+
+
 def update_series():
     pass
 
@@ -230,3 +250,5 @@ def updateVisibleStatus():
 if __name__ == "__main__":
     add_series('tzvi_23', 'FBI', 'fbi-cbs')
     load_one_series('tzvi_23', 'FBI')
+    load_all_series('tzvi_23')
+
