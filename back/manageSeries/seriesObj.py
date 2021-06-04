@@ -35,11 +35,14 @@ class Series:
         self.watched = list()  # To be removed
         self.nextEpisode = None
         self.visible = True
+        msg.print_msg(f'New SeriesObj created name:{name} permalink:{permaLink}')
 
-    def initialize(self):
+    def initialize(self, watched=False):
         # self.fetch_data() currently disabled
         self.fetch_data_once()
         self.adjustTimeZoneToEst()
+        if watched:
+            self.setEpisodesToWatched()
         self.convertDFtoJSON()  # set DF_episodes_json
         self.setNextEpisode()
 
@@ -115,6 +118,11 @@ class Series:
             self.nextEpisode = None
         msg.print_msg('Set next Episode => ' + self.name + ' ' + str(self.nextEpisode))
 
+    def setEpisodesToWatched(self):
+        if self.DF_episodes is not None:
+            msg.print_msg('[setEpisodeToWatched] Update watch status to True compared to Now time')
+            self.DF_episodes['watched'] = self.DF_episodes['air_date'].apply(lambda val: True if datetime.datetime.strptime(val, '%Y-%m-%d %H:%M:%S') < datetime.datetime.now() else False)
+
     # region Convert to and from json
     def convertDFtoJSON(self):
         """
@@ -167,19 +175,22 @@ class Series:
         :return:
         """
         msg.print_msg('Convert JSON to DF')
-        x = flat_dict(json.loads(self.DF_episodes_json))
+        self.DF_episodes = flat_dict(json.loads(self.DF_episodes_json))
 
     # endregion
 
 
 if __name__ == "__main__":
     x = Series(name='FBI', permaLink='fbi-cbs')
-    x.fetch_data_once()
-    # Adjust time zone
-    x.adjustTimeZoneToEst()
-
-    x.convertDFtoJSON()
-    x.convertJSONtoDF()
-
-    x.setNextEpisode()
+    x.initialize(watched=True)
+    # x.fetch_data_once()
+    # # Adjust time zone
+    # x.adjustTimeZoneToEst()
+    #
+    # x.convertDFtoJSON()
+    # x.convertJSONtoDF()
+    #
+    # x.setNextEpisode()
+    # x.setEpisodesToWatched()
+    pass
 

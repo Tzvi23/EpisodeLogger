@@ -24,9 +24,13 @@ class Stamp:
         self.stamp = stamp
         self.ENDC = '\033[0m'
         self.timeColor = '\033[93m'
+        self.ErrorColor = '\033[91m'
 
-    def print_msg(self, msg):
-        print(f"{self.color}{self.stamp}{self.ENDC} | {self.timeColor}{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}{self.ENDC} | {msg}")
+    def print_msg(self, msg, error=False):
+        if error:
+            print(f"{self.color}{self.stamp}{self.ENDC} | {self.timeColor}{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}{self.ENDC} | {self.ErrorColor}{msg}{self.ENDC}")
+        else:
+            print(f"{self.color}{self.stamp}{self.ENDC} | {self.timeColor}{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}{self.ENDC} | {msg}")
 
     def setStamp(self, newStamp):
         self.stamp = newStamp

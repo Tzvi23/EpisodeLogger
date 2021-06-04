@@ -1,8 +1,10 @@
 import pymongo
 from pprint import pprint
 import re
+import json
 
 # Set up messaging class
+from manageSeries.seriesObj import Series
 from misc.printColors import Stamp, bcolors
 
 msg = Stamp(stampColor=bcolors.OKCYAN, stamp='[manageDB]')
@@ -57,10 +59,22 @@ def getEntries(collectionName):
 
 # endregion
 
+def checkCollection(username, source):
+    """
+    Checks if the DB contains a collection with the user name provided.
+    :return: True if exists else False
+    """
+    if username in startupClient[DATABASE_NAME].list_collection_names():
+        msg.print_msg(f'[checkCollection][{source}] Collection for user: {username} exists', error=True)
+        return True
+    return False
+
+
 # region ------- User functions ----------------------------------------------------------------
 
+
 def add_user(name, password):
-    msg.print_msg(f'Add user: {name}')
+    msg.print_msg(f'[add_user] Add user: {name}')
 
     def checkName():
         # Checks if name is alphanumeric characters (space is not allowed)
@@ -78,16 +92,6 @@ def add_user(name, password):
             msg.print_msg('Check password failed')
             return False
 
-    def checkCollection():
-        """
-        Checks if the DB contains a collection with the user name provided.
-        :return: True if exists else False
-        """
-        if name in startupClient[DATABASE_NAME].list_collection_names():
-            msg.print_msg(f'Collection for user: {name} already exists choose another username')
-            return True
-        return False
-
     def addUserEntry():
         """
         Add user data to the user registry collection
@@ -97,7 +101,7 @@ def add_user(name, password):
         msg.print_msg(f"Added new user: UserName: {name}")
 
     if checkName() and checkPassword():
-        if not checkCollection():
+        if not checkCollection(name, 'add_user'):
             startupClient[DATABASE_NAME].create_collection(name)  # Create new collection for the new user
             startupClient[DATABASE_NAME][name].create_index([("permaLink", pymongo.DESCENDING)],
                                                             unique=True)  # Creates index to support unique values for perma-links
@@ -114,14 +118,14 @@ def add_user(name, password):
     return False
 
 
-def verifyUser(userInput):
+def verifyUser(userInputJSON):
     """
     Verifying user data
-    :param userInput: JSON type variable contains username and password
+    :param userInputJSON: JSON type variable: {'username': 'value' , 'password':'value'}
     :return: True if valid else False
     """
     usercol = startupClient[DATABASE_NAME]["users"]
-    if usercol.count_documents(userInput) == 1:
+    if usercol.count_documents(userInputJSON) == 1:
         return True
     else:
         return False
@@ -146,13 +150,38 @@ def deleteUserPermanently(username, password):
             userRegistry.delete_one({"userName": username, "password": password})
             msg.print_msg(f'Document for {username} dropped from users collection')
     else:
-        msg.print_msg(f'No user data for {username} found')
+        msg.print_msg(f'No user data for {username} found', error=True)
 
 
-# endregion
+# endregion ------- [END] User functions ----------------------------------------------------------------
 
-def add_series():
-    pass
+# region ------- Series functions -----------------------------------------------------------------------
+def add_series(userName, seriesName, seriesPermalink, watched=False):
+    userCol = startupClient[DATABASE_NAME][userName]  # Get collection cursor
+
+    def checkIfSeriesExists():
+        """
+        Using query to check if series already in the database.
+        :return: True if exists
+        """
+        if userCol.count_documents({"permaLink": seriesPermalink}) == 1:
+            return True
+
+    if not checkCollection(userName, 'add_series'):
+        msg.print_msg(f'[add_series] Collection for {userName} does not exist cannot add series')
+        return False
+    elif checkIfSeriesExists():
+        msg.print_msg(f'[add_series] {seriesPermalink} already in the collection. Abort.', error=True)
+        return False
+    else:
+        newSeriesObj = Series(name=seriesName, permaLink=seriesPermalink)
+        newSeriesObj.initialize(watched)
+        newSeriesObjDict = newSeriesObj.__dict__
+        del newSeriesObjDict['DF_episodes']
+        del newSeriesObjDict['nextEpisode']
+        userCol.insert_one(newSeriesObjDict)
+        msg.print_msg(f'New series added! Collection: {userName} | Series: {seriesName}')
+        return True
 
 
 def update_series():
@@ -161,6 +190,8 @@ def update_series():
 
 def updateVisibleStatus():
     pass
+
+# endregion ------- [END] Series functions -----------------------------------------------------------------------
 
 
 if __name__ == "__main__":
