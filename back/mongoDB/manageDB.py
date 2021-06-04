@@ -1,5 +1,6 @@
 import pymongo
 from pprint import pprint
+import re
 
 # Set up messaging class
 from misc.printColors import Stamp, bcolors
@@ -28,7 +29,7 @@ def first_set_up():
         return
 
 
-# region ------- Getters --------
+# region ------- Getters ------------------------------------------------------------------------
 
 
 def getDatabases():
@@ -56,49 +57,99 @@ def getEntries(collectionName):
 
 # endregion
 
-# Some functions that need to be created and configured
+# region ------- User functions ----------------------------------------------------------------
 
 def add_user(name, password):
     msg.print_msg(f'Add user: {name}')
 
     def checkName():
-        return True
+        # Checks if name is alphanumeric characters (space is not allowed)
+        if re.match("^[a-zA-Z0-9_.-]+$", name):
+            return True
+        else:
+            msg.print_msg('Check name failed')
+            return False
 
     def checkPassword():
-        return True
+        # original password regex: [A-Za-z0-9@#$%^&+=]{8,}
+        if re.fullmatch(r'[0-9]{3,}', password):
+            return True
+        else:
+            msg.print_msg('Check password failed')
+            return False
 
     def checkCollection():
+        """
+        Checks if the DB contains a collection with the user name provided.
+        :return: True if exists else False
+        """
         if name in startupClient[DATABASE_NAME].list_collection_names():
+            msg.print_msg(f'Collection for user: {name} already exists choose another username')
             return True
         return False
 
-    def checkUnique(newName):
-        usersNames = startupClient[DATABASE_NAME]["users"].find({}, {"userName": 1})  # Get just username column
-        if usersNames.count() == 1:
-            return True
-        for name in usersNames:
-            if name["userName"].lower() == newName.lower():
-                msg.print_msg(f"[!!] Name already exists => {newName}")
-                return False
-
     def addUserEntry():
+        """
+        Add user data to the user registry collection
+        """
         userCol = startupClient[DATABASE_NAME]
         userCol["users"].insert_one({"userName": name, "password": password})
         msg.print_msg(f"Added new user: UserName: {name}")
 
-    if not checkCollection():
-        startupClient[DATABASE_NAME].create_collection(name)  # Create new collection for the new user
-        startupClient[DATABASE_NAME][name].create_index([("permaLink", pymongo.DESCENDING)], unique=True)
-        msg.print_msg(f"Created new collection for {name}")
-
     if checkName() and checkPassword():
-        try:
-            addUserEntry()
-        except pymongo.errors.DuplicateKeyError as error:
-            msg.print_msg('[!!ERROR!!] User not added - duplicated key')
-            return False
-    return True
+        if not checkCollection():
+            startupClient[DATABASE_NAME].create_collection(name)  # Create new collection for the new user
+            startupClient[DATABASE_NAME][name].create_index([("permaLink", pymongo.DESCENDING)],
+                                                            unique=True)  # Creates index to support unique values for perma-links
+            msg.print_msg(f"Created new collection for {name}")
 
+            try:
+                addUserEntry()
+                msg.print_msg(f'Username: {name} added successfully')
+                return True
+            except pymongo.errors.DuplicateKeyError as error:
+                msg.print_msg('[!!ERROR!!] User not added - duplicated key')
+                return False
+        return False
+    return False
+
+
+def verifyUser(userInput):
+    """
+    Verifying user data
+    :param userInput: JSON type variable contains username and password
+    :return: True if valid else False
+    """
+    usercol = startupClient[DATABASE_NAME]["users"]
+    if usercol.count_documents(userInput) == 1:
+        return True
+    else:
+        return False
+
+
+def deleteUserPermanently(username, password):
+    """
+    CLI command only. Requires respond to question.
+    Deletes all user data, that includes the collection for the specific user and its username and password from users collection
+    :param username: String
+    :param password: String
+    :return: None - prints messages
+    """
+    if verifyUser({"userName": username, "password": password}):
+        ans = input(f'Are you sure to delete all data for {username}? y/n')
+        if ans == 'y':
+            db = startupClient[DATABASE_NAME]
+            userCollection = db[username]
+            userCollection.drop()  # Add try catch
+            msg.print_msg(f'Collection for {username} dropped')
+            userRegistry = db['users']
+            userRegistry.delete_one({"userName": username, "password": password})
+            msg.print_msg(f'Document for {username} dropped from users collection')
+    else:
+        msg.print_msg(f'No user data for {username} found')
+
+
+# endregion
 
 def add_series():
     pass
@@ -108,21 +159,9 @@ def update_series():
     pass
 
 
-def verifyUser(userInput):
-    # Gets as input a json with user name and password
-    # If found the exact same data than the user name and password are correct.
-    usercol = startupClient[DATABASE_NAME]["users"]
-    result = usercol.find(userInput)
-    if result.count() == 1:
-        return True
-    else:
-        return False
-
-
 def updateVisibleStatus():
     pass
 
 
 if __name__ == "__main__":
-    # first_set_up()
     pass
