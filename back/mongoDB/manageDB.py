@@ -22,9 +22,9 @@ def first_set_up():
         db = startupClient[DATABASE_NAME]
         db.create_collection("users").insert_one({})
         db["users"].create_index([("userName", pymongo.DESCENDING)], unique=True)
-        print(f"Created database {DATABASE_NAME} ")
+        msg.print_msg(f"Created database {DATABASE_NAME} ")
     else:
-        print("Database exists :) ")
+        msg.print_msg("Database exists :) ")
         return
 
 
@@ -34,7 +34,7 @@ def first_set_up():
 def getDatabases():
     msg.print_msg('Get data bases')
     x = startupClient.list_database_names()
-    print(f"Databases: {x}")
+    msg.print_msg(f"Databases: {x}")
     return x
 
 
@@ -44,11 +44,11 @@ def getCollections():
     print("Collections: ")
     for databaseName in x:
         db = startupClient[databaseName].list_collection_names()
-        print(f"Database: {databaseName} => Collections: {db}")
+        msg.print_msg(f"Database: {databaseName} => Collections: {db}")
 
 
 def getEntries(collectionName):
-    msg.print_msg()
+    msg.print_msg(f'Get Entries for: {collectionName}')
     colDb = startupClient[DATABASE_NAME][collectionName]
     for entry in colDb.find():
         pprint(entry)
@@ -78,24 +78,24 @@ def add_user(name, password):
             return True
         for name in usersNames:
             if name["userName"].lower() == newName.lower():
-                print(f"[!!] Name already exists => {newName}")
+                msg.print_msg(f"[!!] Name already exists => {newName}")
                 return False
 
     def addUserEntry():
         userCol = startupClient[DATABASE_NAME]
         userCol["users"].insert_one({"userName": name, "password": password})
-        print(f"Added new user: UserName: {name}")
+        msg.print_msg(f"Added new user: UserName: {name}")
 
     if not checkCollection():
         startupClient[DATABASE_NAME].create_collection(name)  # Create new collection for the new user
         startupClient[DATABASE_NAME][name].create_index([("permaLink", pymongo.DESCENDING)], unique=True)
-        print(f"Created new collection for {name}")
+        msg.print_msg(f"Created new collection for {name}")
 
     if checkName() and checkPassword():
         try:
             addUserEntry()
         except pymongo.errors.DuplicateKeyError as error:
-            print("[!!ERROR!!] User not added duplicated key")
+            msg.print_msg('[!!ERROR!!] User not added - duplicated key')
             return False
     return True
 
