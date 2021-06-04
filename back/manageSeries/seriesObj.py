@@ -27,12 +27,13 @@ class Series:
         self.name = name
         self.permaLink = permaLink
         self.lastDbUpdate = None
-        self.episodes = list()
+        self.episodes = None  # To be removed [list]
         self.DF_episodes = None
-        self.DF_episodes_json = None
+        self.DF_episodes_json_str = None
+        self.DF_episodes_json_dict = None
         self.data = None
         self.countDown = None  # To be removed
-        self.watched = list()  # To be removed
+        self.watched = None  # To be removed [list]
         self.nextEpisode = None
         self.visible = True
         msg.print_msg(f'New SeriesObj created name:{name} permalink:{permaLink}')
@@ -98,7 +99,7 @@ class Series:
         df['air_date'] = df['air_date'].apply(lambda x: ISR.localize(datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')))  # Convert to dateTime
         df['air_date'] = df['air_date'].apply(
             lambda x: EDT.normalize(x.astimezone(EDT)).strftime('%Y-%m-%d %H:%M:%S'))  # Adjust time zone and convert to string
-        self.episodes = df.to_dict('records')
+        # self.episodes = df.to_dict('records')
         msg.print_msg('Done')
 
     def setNextEpisode(self):
@@ -166,7 +167,8 @@ class Series:
             # Add to base variable
             jsonData[str(seasonNumber)] = json.loads(jsonFormat)
 
-        self.DF_episodes_json = json.dumps(jsonData)
+        self.DF_episodes_json_str = json.dumps(jsonData)
+        self.DF_episodes_json_dict = jsonData
 
     def convertJSONtoDF(self):
         """
@@ -175,7 +177,7 @@ class Series:
         :return:
         """
         msg.print_msg('Convert JSON to DF')
-        self.DF_episodes = flat_dict(json.loads(self.DF_episodes_json))
+        self.DF_episodes = pd.DataFrame(flat_dict(json.loads(self.DF_episodes_json_str)))
 
     # endregion
 

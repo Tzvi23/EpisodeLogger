@@ -1,7 +1,6 @@
 import pymongo
 from pprint import pprint
 import re
-import json
 
 # Set up messaging class
 from manageSeries.seriesObj import Series
@@ -184,6 +183,40 @@ def add_series(userName, seriesName, seriesPermalink, watched=False):
         return True
 
 
+def load_one_series(userName, seriesName=None, seriesPermalink=None):
+    """
+    Queries the DB for one series data. Returns dictionary structure variable that includes:
+    name, permalink, DF_episodes_json_str, DF_episodes_json_dict, visible
+    Need at least seriesName or seriesPermalink values.
+    :param userName: String
+    :param seriesName: String
+    :param seriesPermalink: String
+    :return: Dictionary value
+    """
+    if seriesName is None and seriesPermalink is None:
+        msg.print_msg('[load_one_series] Both seriesName and permalink are None need at least one.', error=True)
+        return False
+    if not checkCollection(userName, 'load_one_series'):
+        msg.print_msg(f'[add_series] Collection for {userName} does not exist cannot add series')
+        return False
+
+    def queryDB(query):
+        # Result query returns without the fields that are set as 0
+        return userCol.find_one(query, {"_id": 0, "lastDbUpdate": 0, "episodes": 0, "data": 0, "countDown": 0, "watched": 0})
+
+    userCol = startupClient[DATABASE_NAME][userName]  # Get collection cursor
+    # Query the series
+    # Will query with the first parameter that is not None
+    if seriesName is not None:
+        query = {"name": seriesName}
+        res = queryDB(query)
+        return res
+    elif seriesPermalink is not None:
+        query = {"permalink": seriesPermalink}
+        res = queryDB(query)
+        return res
+
+
 def update_series():
     pass
 
@@ -195,4 +228,5 @@ def updateVisibleStatus():
 
 
 if __name__ == "__main__":
-    pass
+    add_series('tzvi_23', 'FBI', 'fbi-cbs')
+    load_one_series('tzvi_23', 'FBI')
