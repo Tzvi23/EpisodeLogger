@@ -156,6 +156,20 @@ def deleteUserPermanently(username, password):
 # endregion ------- [END] User functions ----------------------------------------------------------------
 
 # region ------- Series functions -----------------------------------------------------------------------
+def convertNextEpisodeData(nextEpisodeList):
+    """
+    Converts the data from list to dict format and changes variables type to be compatible with JSON serialization.
+    :param nextEpisodeList: List type object from Series class (Series.nextEpisode)
+    :return: Dict type variable with changed variable types
+    """
+    return {"season": int(nextEpisodeList[0]),
+            "episode": int(nextEpisodeList[1]),
+            "episode_name": nextEpisodeList[2],
+            "air_date": nextEpisodeList[3],
+            "watched": bool(nextEpisodeList[4]),
+            "days": nextEpisodeList[5]}
+
+
 def add_series(userName, seriesName, seriesPermalink, watched=False):
     userCol = startupClient[DATABASE_NAME][userName]  # Get collection cursor
 
@@ -178,7 +192,7 @@ def add_series(userName, seriesName, seriesPermalink, watched=False):
         newSeriesObj.initialize(watched)
         newSeriesObjDict = newSeriesObj.__dict__
         del newSeriesObjDict['DF_episodes']
-        del newSeriesObjDict['nextEpisode']
+        newSeriesObjDict['nextEpisode'] = convertNextEpisodeData(newSeriesObjDict['nextEpisode'])
         userCol.insert_one(newSeriesObjDict)
         msg.print_msg(f'New series added! Collection: {userName} | Series: {seriesName}')
         return True
@@ -288,15 +302,19 @@ def updateWatchStatusForSingleEpisode(userName, seriesName, season, episode, vis
     # Update watch status for one specific episode
     query = {'name': seriesName}
     updateVal = {'$set': {f'DF_episodes_json_dict.{season}.{episode}.watched': visStatus}}
-    checkOp(userCol.update_one(query, updateVal), func_name='updateWatchStatusForSingleEpisode', op_name='update episode watch status DB')  # Update the DB and prints relevant status
+    checkOp(userCol.update_one(query, updateVal), func_name='updateWatchStatusForSingleEpisode',
+            op_name='update episode watch status DB')  # Update the DB and prints relevant status
 
     # Update the string value representation for the json object
     updateVal = {'$set': {f'DF_episodes_json_str': json.dumps(userCol.find_one(query)['DF_episodes_json_dict'])}}
     checkOp(userCol.update_one(query, updateVal), func_name='updateWatchStatusForSingleEpisode',
             op_name='update json String')  # Update the DB and prints relevant status
 
-    msg.print_msg(f'[updateWatchStatusForSingleEpisode] Updated watched status to: {visStatus} for series: {seriesName}|S:{season}|E:{episode}')
+    msg.print_msg(
+        f'[updateWatchStatusForSingleEpisode] Updated watched status to: {visStatus} for series: {seriesName}|S:{season}|E:{episode}')
     return True
+
+
 # endregion ------- [END] Series functions -----------------------------------------------------------------------
 
 
@@ -315,7 +333,9 @@ def checkOp(op, func_name, op_name):
 
 if __name__ == "__main__":
     add_series('tzvi_23', 'FBI', 'fbi-cbs')
+    add_series('tzvi_23', 'SnowPiercer', 'snowpiercer')
     load_one_series('tzvi_23', 'FBI')
     load_all_series('tzvi_23')
     updateVisibleStatus('tzvi_23', 'FBI', True)
     updateWatchStatusForSingleEpisode('tzvi_23', 'FBI', '4', '1', True)
+    updateWatchStatusForSingleEpisode('tzvi_23', 'SnowPiercer', '1', '3', True)
