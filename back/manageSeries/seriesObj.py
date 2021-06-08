@@ -2,6 +2,7 @@ import requests
 import datetime
 
 import pandas as pd
+pd.set_option('mode.chained_assignment', None)
 
 import pickle
 from pathlib import Path
@@ -105,6 +106,7 @@ class Series:
     def setNextEpisode(self):
         """
         Setting the next episode and number of days past the air date.
+        The first episode that marked as watched False even if there is a episode that marked as watched True after it.
         """
         msg.print_msg('Set next Episode')
         self.nextEpisode = self.DF_episodes[self.DF_episodes.watched == False]

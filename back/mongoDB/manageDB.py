@@ -165,7 +165,7 @@ def convertNextEpisodeData(nextEpisodeList):
     return {"season": int(nextEpisodeList[0]),
             "episode": int(nextEpisodeList[1]),
             "episode_name": nextEpisodeList[2],
-            "air_date": nextEpisodeList[3],
+            "air_date": str(nextEpisodeList[3]),
             "watched": bool(nextEpisodeList[4]),
             "days": nextEpisodeList[5]}
 
@@ -289,7 +289,7 @@ def updateWatchStatusForSingleEpisode(userName, seriesName, season, episode, vis
     :param visStatus: Boolean - True / False
     :return: Success / Failure
     """
-    if not checkCollection(userName, 'load_all_series'):
+    if not checkCollection(userName, 'updateWatchStatusForSingleEpisode'):
         msg.print_msg(f'[updateWatchStatusForSingleEpisode] Collection for {userName} does not exist cannot add series')
         return False
 
@@ -315,6 +315,29 @@ def updateWatchStatusForSingleEpisode(userName, seriesName, season, episode, vis
     return True
 
 
+def updateNextEpisode(userName, seriesName):
+    """
+    Updates the nextEpisode value based on DF_episodes_json_str and the Series object functions.
+    :param userName: String userName
+    :param seriesName: String seriesName
+    """
+    if not checkCollection(userName, 'updateNextEpisode'):
+        msg.print_msg(f'Collection for {userName} does not exist cannot add series')
+        return False
+
+    dummySeriesObj = Series(seriesName)
+    dbData = load_one_series(userName=userName, seriesName=seriesName)
+    dummySeriesObj.DF_episodes_json_str = dbData['DF_episodes_json_str']
+    dummySeriesObj.convertJSONtoDF()
+    dummySeriesObj.setNextEpisode()
+    newNextEpisode = convertNextEpisodeData(dummySeriesObj.nextEpisode)
+    msg.print_msg(f'[updateNextEpisode] Update next episode for series: {seriesName}', error=0)
+    # Update the data at the DB
+    userCol = startupClient[DATABASE_NAME][userName]  # Get collection cursor
+    query = {'name': seriesName}
+    updateVal = {'$set': {f'nextEpisode': newNextEpisode}}
+    checkOp(userCol.update_one(query, updateVal), func_name='updateNextEpisode',
+            op_name='update nextEpisode data')  # Update the DB and prints relevant status
 # endregion ------- [END] Series functions -----------------------------------------------------------------------
 
 
@@ -338,4 +361,7 @@ if __name__ == "__main__":
     load_all_series('tzvi_23')
     updateVisibleStatus('tzvi_23', 'FBI', True)
     updateWatchStatusForSingleEpisode('tzvi_23', 'FBI', '4', '1', True)
+    updateWatchStatusForSingleEpisode('tzvi_23', 'SnowPiercer', '1', '1', True)
+    updateWatchStatusForSingleEpisode('tzvi_23', 'SnowPiercer', '1', '2', True)
     updateWatchStatusForSingleEpisode('tzvi_23', 'SnowPiercer', '1', '3', True)
+    updateNextEpisode(userName='tzvi_23', seriesName='SnowPiercer')
