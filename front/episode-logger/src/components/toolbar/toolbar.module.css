@@ -1,0 +1,36 @@
+.header_toolbar{
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #FF7129;
+    justify-content: space-between;
+  }
+  
+  .menu_Icon{
+    margin-left: 10px;
+  }
+  
+  .current_title{
+    float: none;
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translate(-50%);
+  }
+  
+  .current_user{
+    margin-right: 10px
+  }
+  
+  .logIn{
+    display: flex;
+    flex-direction: row;
+    padding-right: 5px;
+  }
+  
+  .logout_button{
+    padding: 5px;
+  }
+  

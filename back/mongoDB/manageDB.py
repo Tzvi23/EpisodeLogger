@@ -255,6 +255,10 @@ def load_all_series(userName):
 
 
 def update_series():
+    """
+    This function should receive JSON like string/object and update the DB.
+    Will be implemented in parallel to the frontend.
+    """
     pass
 
 
@@ -357,7 +361,7 @@ def checkOp(op, func_name, op_name):
 if __name__ == "__main__":
     add_series('tzvi_23', 'FBI', 'fbi-cbs')
     add_series('tzvi_23', 'SnowPiercer', 'snowpiercer')
-    load_one_series('tzvi_23', 'FBI')
+    fbiSeries = load_one_series('tzvi_23', 'FBI')
     load_all_series('tzvi_23')
     updateVisibleStatus('tzvi_23', 'FBI', True)
     updateWatchStatusForSingleEpisode('tzvi_23', 'FBI', '4', '1', True)
