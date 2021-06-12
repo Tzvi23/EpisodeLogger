@@ -3,7 +3,7 @@ import './App.css';
 import { Route, Switch, Redirect, BrowserRouter } from 'react-router-dom';
 
 import AddSeries from './screens/AddSeries';
-import Login from './screens/Login';
+import Login from './screens/Login/Login';
 import NextEpisode from './screens/NextEpisode';
 import RemoveSeries from './screens/RemoveSeries';
 import Watched from './screens/Watched';
@@ -17,6 +17,7 @@ function App() {
     <div className="App">
       <BrowserRouter>
           <Toolbar/>
+          <div id='mainCenter' style={{'display': 'flex','justifyContent': 'center', 'marginTop': '30px'}}>
           <Switch>
             <Route path="/" exact>
               <Redirect to="/login" />
@@ -40,6 +41,7 @@ function App() {
               <UpdateSeries />
             </Route>
           </Switch>
+          </div>
         </BrowserRouter>
     </div>
   );

@@ -12,7 +12,7 @@ import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
 import MenuIcon from "@material-ui/icons/Menu";
 
-import { Route, Switch, Link, BrowserRouter, Redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles({
   list: {
@@ -32,10 +32,8 @@ const redirectToScreen = (screenName) => {
     "Remove series": "/removeSeries",
     "Log In": "/login"
   }
-
-  console.log(screenName);
+  
   let path = screensPath[screenName];
-  console.log(path);
 
   return path;
 };
