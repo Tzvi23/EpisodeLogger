@@ -7,13 +7,13 @@ import classes from "./toolbar.module.css";
 
 import ProfileMenu from '../proflieMenuButton';
 
-const toolbar = (props) => {
+const Toolbar = (props) => {
 
   return (
     <div className={classes.header_toolbar}>
         <SideDrawer />
       <div className={classes.current_title}>
-        Props title
+        Screen Title
       </div>
         <div className={classes.current_user}>
           <div>{props.userName}</div>
@@ -31,4 +31,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps)(toolbar);
+export default connect(mapStateToProps)(Toolbar);

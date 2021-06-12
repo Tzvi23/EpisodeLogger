@@ -245,13 +245,13 @@ def load_all_series(userName):
         msg.print_msg(f'[add_series] Collection for {userName} does not exist cannot add series')
         return False
 
-    seriesDataList = list()
+    seriesDataDict = dict()
     userCol = startupClient[DATABASE_NAME][userName]  # Get collection cursor
     for series in userCol.find({},
-                               {"_id": 0, "lastDbUpdate": 0, "episodes": 0, "data": 0, "countDown": 0, "watched": 0}):
+                               {"_id": 0, "lastDbUpdate": 0, "episodes": 0, "data": 0, "countDown": 0, "watched": 0, "DF_episodes_json_str": 0}):
         msg.print_msg(f"[load_all_series] Adding {series['name']} to list for user {userName}")
-        seriesDataList.append(series)
-    return seriesDataList
+        seriesDataDict[series['name']] = series
+    return seriesDataDict
 
 
 def update_series():

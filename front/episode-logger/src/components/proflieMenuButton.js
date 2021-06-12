@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
+import * as actionTypes from '../store/actions';
 
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -18,6 +20,7 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
     if (props.curUsrName !== 'Guest'){
         console.log('Log out Function!');
+        props.onLogin('Guest', '');
     };
   };
 
@@ -55,4 +58,16 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
   );
 }
 
-export default ProfileMenu;
+// Define function action to update store
+const mapDispathToProps = (dispatch) => {
+  return {
+      onLogin: (usrName, usrPass) =>
+      dispatch({
+          type: actionTypes.USER_LOGIN,
+          userName: usrName,
+          password: usrPass
+      })
+  };
+};
+
+export default connect(null, mapDispathToProps)(ProfileMenu);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
+import { Redirect } from 'react-router-dom';
 
 import * as actionTypes from '../../store/actions';
 import classes from "./Login.module.css";
@@ -17,9 +18,11 @@ import Button from '@material-ui/core/Button';
 
 const Login = (props) => {
     const [values, setValues] = useState({
+        userName: '',
         password: '',
         showPassword: false,
       });
+    const [redirect, setRedirect] = useState(false);
 
     //Password input functions
     const handleChange = (prop) => (event) => {
@@ -34,14 +37,44 @@ const Login = (props) => {
         event.preventDefault();
     };
 
+    // Log In request with username and password data
+    const logIn = () => {
+        const cred = { ...values };
+        delete cred.showPassword;
+
+        let bodyData = {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(cred)
+        }
+
+        fetch('/login', bodyData)
+        .then(response => {
+            if (response.ok){
+                props.onLogin(cred.userName, '');
+                setRedirect(true)
+            }
+        });
+    };
+
+    // const testServer = () => {
+    //     fetch("/getDataTest").then(
+    //         (response) => response.json().then(data => console.log(data))
+    //     );
+    // };
+
     return (
         <div>
+        {redirect ? <Redirect to="/nextEpisode"/> : null }
     <div className={classes.card}>
         {/* User Name Input */}
         <FormControl >
             <InputLabel htmlFor="input-userName">User Name</InputLabel>
             <Input
             id="input-userName"
+            onChange={handleChange('userName')}
             startAdornment={
                 <InputAdornment position="start">
                     <AccountCircle />
@@ -71,7 +104,7 @@ const Login = (props) => {
             />
         </FormControl>
         {/* Login Button */}
-        <Button variant="contained">Log In</Button>
+        <Button variant="contained" onClick={logIn}>Log In</Button>
     </div>
     </div>
     );
@@ -87,7 +120,7 @@ const mapStateToProps = (state) => {
     };
 };
 
-// Define function aciton to update store
+// Define function action to update store
 const mapDispathToProps = (dispatch) => {
     return {
         onLogin: (usrName, usrPass) =>
