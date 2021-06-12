@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import * as actionTypes from '../store/actions';
 
@@ -19,6 +19,11 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
     setAnchorEl(null);
   };
 
+  const logInFunc = (screenName) => {
+    setAnchorEl(null);
+    props.screenName(screenName);
+  };
+
   const logOutFunc = () => {
     setAnchorEl(null);
 
@@ -36,7 +41,7 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
           return (
             <MenuItem component={Link}
             to={'/login'} 
-            onClick={handleClose}>Log In</MenuItem>
+            onClick={() => logInFunc("Log In")}>Log In</MenuItem>
           );
       }
       else return (<MenuItem 

@@ -38,11 +38,15 @@ const redirectToScreen = (screenName) => {
   return path;
 };
 
-export default function SideDrawer() {
+export default function SideDrawer(props) {
   const classes = useStyles();
   const [state, setState] = React.useState({
     left: false,
   });
+
+  const updateScreenName = (screenName) => {
+    props.screenName(screenName);
+  };
 
   const toggleDrawer = (anchor, open) => (event) => {
     setState({ ...state, [anchor]: open });
@@ -63,6 +67,7 @@ export default function SideDrawer() {
               key={text}
               component={Link}
               to={redirectToScreen(text)}
+              onClick={() => updateScreenName(text)}
             >
               <ListItemIcon>
                 {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
@@ -79,7 +84,8 @@ export default function SideDrawer() {
           button
           key={text}
           component={Link}
-          to={redirectToScreen(text)}>
+          to={redirectToScreen(text)}
+          onClick={() => updateScreenName(text)}>
             <ListItemIcon>
               {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
             </ListItemIcon>
