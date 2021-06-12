@@ -37,7 +37,7 @@ function App() {
               <RemoveSeries />
             </Route>
             <Route path="/watched">
-              <Watched />
+              <Watched setScreenName={setScreenName}/>
             </Route>
             <Route path="/updateSeries">
               <UpdateSeries />
