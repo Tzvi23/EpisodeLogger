@@ -23,6 +23,7 @@ const Login = (props) => {
         showPassword: false,
       });
     const [redirect, setRedirect] = useState(false);
+    const [notAuth, setNotAuth] = useState(false);
 
     //Password input functions
     const handleChange = (prop) => (event) => {
@@ -54,10 +55,20 @@ const Login = (props) => {
         .then(response => {
             if (response.ok){
                 props.onLogin(cred.userName, '');
-                setRedirect(true)
+                setNotAuth(false);
+                setRedirect(true);
+            }
+            else {
+                setNotAuth(true);
             }
         });
     };
+
+    const badUser = (
+        <div className={classes.errorCard}>
+                Bad User name or password
+        </div>
+    );
 
     // const testServer = () => {
     //     fetch("/getDataTest").then(
@@ -68,45 +79,46 @@ const Login = (props) => {
     return (
         <div>
         {redirect ? <Redirect to="/nextEpisode"/> : null }
-    <div className={classes.card}>
-        {/* User Name Input */}
-        <FormControl >
-            <InputLabel htmlFor="input-userName">User Name</InputLabel>
-            <Input
-            id="input-userName"
-            onChange={handleChange('userName')}
-            startAdornment={
-                <InputAdornment position="start">
-                    <AccountCircle />
-                </InputAdornment>
-            }
-            />
-        </FormControl>
-      {/* Password Input */}
-        <FormControl >
-            <InputLabel htmlFor="standard-adornment-password">Password</InputLabel>
-            <Input
-                id="standard-adornment-password"
-                type={values.showPassword ? 'text' : 'password'}
-                value={values.password}
-                onChange={handleChange('password')}
-                endAdornment={
-                <InputAdornment position="end">
-                    <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={handleClickShowPassword}
-                    onMouseDown={handleMouseDownPassword}
-                    >
-                    {values.showPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                </InputAdornment>
-                }
-            />
-        </FormControl>
-        {/* Login Button */}
-        <Button variant="contained" onClick={logIn}>Log In</Button>
-    </div>
-    </div>
+            <div className={classes.card}>
+                {/* User Name Input */}
+                <FormControl >
+                    <InputLabel htmlFor="input-userName">User Name</InputLabel>
+                    <Input
+                    id="input-userName"
+                    onChange={handleChange('userName')}
+                    startAdornment={
+                        <InputAdornment position="start">
+                            <AccountCircle />
+                        </InputAdornment>
+                    }
+                    />
+                </FormControl>
+            {/* Password Input */}
+                <FormControl >
+                    <InputLabel htmlFor="standard-adornment-password">Password</InputLabel>
+                    <Input
+                        id="standard-adornment-password"
+                        type={values.showPassword ? 'text' : 'password'}
+                        value={values.password}
+                        onChange={handleChange('password')}
+                        endAdornment={
+                        <InputAdornment position="end">
+                            <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowPassword}
+                            onMouseDown={handleMouseDownPassword}
+                            >
+                            {values.showPassword ? <Visibility /> : <VisibilityOff />}
+                            </IconButton>
+                        </InputAdornment>
+                        }
+                    />
+                </FormControl>
+                {/* Login Button */}
+                <Button variant="contained" onClick={logIn}>Log In</Button>
+            </div>
+            {notAuth ? badUser : null}
+        </div>
     );
 };
 

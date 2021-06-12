@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import * as actionTypes from '../store/actions';
 
@@ -16,6 +16,10 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
   };
 
   const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const logOutFunc = () => {
     setAnchorEl(null);
 
     if (props.curUsrName !== 'Guest'){
@@ -35,7 +39,10 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
             onClick={handleClose}>Log In</MenuItem>
           );
       }
-      else return (<MenuItem onClick={handleClose}>Log Out</MenuItem>);
+      else return (<MenuItem 
+                    component={Link}
+                    to={'/login'} 
+                    onClick={logOutFunc}>Log Out</MenuItem>);
   };
 
   return (
