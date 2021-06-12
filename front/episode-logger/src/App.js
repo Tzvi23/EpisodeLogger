@@ -25,22 +25,22 @@ function App() {
               <Redirect to="/login" />
             </Route>
             <Route path="/addSeries" >
-              <AddSeries />
+              <AddSeries setScreenName={setScreenName}/>
             </Route>
             <Route path="/login">
               <Login setScreenName={setScreenName}/>
             </Route>
             <Route path="/nextEpisode">
-              <NextEpisode />
+              <NextEpisode setScreenName={setScreenName}/>
             </Route>
             <Route path="/removeSeries">
-              <RemoveSeries />
+              <RemoveSeries setScreenName={setScreenName}/>
             </Route>
             <Route path="/watched">
               <Watched setScreenName={setScreenName}/>
             </Route>
             <Route path="/updateSeries">
-              <UpdateSeries />
+              <UpdateSeries setScreenName={setScreenName}/>
             </Route>
           </Switch>
           </div>

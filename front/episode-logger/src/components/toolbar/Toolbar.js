@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { connect } from 'react-redux';
 
 import SideDrawer from "../sideDrawer/SideDrawer.js";
@@ -8,8 +8,6 @@ import classes from "./toolbar.module.css";
 import ProfileMenu from '../proflieMenuButton';
 
 const Toolbar = (props) => {
-  // const [screenName, setScreenName] = useState('Log In');
-
 
   return (
     <div className={classes.header_toolbar}>

@@ -77,9 +77,10 @@ const Login = (props) => {
     //     );
     // };
 
-    return (
-        <div>
-        {redirect ? <Redirect to="/nextEpisode"/> : null }
+    // Logged user or not
+    const logForm = (
+    <div>
+        
             <div className={classes.card}>
                 {/* User Name Input */}
                 <FormControl >
@@ -119,6 +120,20 @@ const Login = (props) => {
                 <Button variant="contained" onClick={logIn}>Log In</Button>
             </div>
             {notAuth ? badUser : null}
+        </div>
+    );
+
+    const logOutButton = (
+        <div className={classes.card}>
+            You are logged as: {props.userName}
+            <Button variant="contained" onClick={() => props.onLogin('Guest', '')}>Log Out</Button>
+        </div>
+    );
+
+    return (
+        <div>
+            {redirect ? <Redirect to="/nextEpisode"/> : null }
+            {props.userName === 'Guest' ? logForm : logOutButton}
         </div>
     );
 };
