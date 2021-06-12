@@ -57,6 +57,7 @@ const Login = (props) => {
                 props.onLogin(cred.userName, '');
                 setNotAuth(false);
                 setRedirect(true);
+                props.setScreenName("Next Episode");
             }
             else {
                 setNotAuth(true);

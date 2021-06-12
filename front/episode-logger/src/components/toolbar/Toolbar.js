@@ -8,18 +8,18 @@ import classes from "./toolbar.module.css";
 import ProfileMenu from '../proflieMenuButton';
 
 const Toolbar = (props) => {
-  const [screenName, setScreenName] = useState('Log In');
+  // const [screenName, setScreenName] = useState('Log In');
 
 
   return (
     <div className={classes.header_toolbar}>
-        <SideDrawer screenName={setScreenName}/>
+        <SideDrawer screenName={props.setScreenName}/>
       <div className={classes.current_title}>
-        {screenName}
+        {props.curScreenName}
       </div>
         <div className={classes.current_user}>
           <div>{props.userName}</div>
-          <ProfileMenu curUsrName={props.userName} screenName={setScreenName}/>
+          <ProfileMenu curUsrName={props.userName} screenName={props.setScreenName}/>
         </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import './App.css';
 
 import { Route, Switch, Redirect, BrowserRouter } from 'react-router-dom';
+import { useState } from 'react';
 
 import AddSeries from './screens/AddSeries';
 import Login from './screens/Login/Login';
@@ -12,11 +13,12 @@ import UpdateSeries from './screens/UpdateSeries';
 import Toolbar from './components/toolbar/Toolbar';
 
 function App() {
+  const [screenName, setScreenName] = useState('Log In');
 
   return (
     <div className="App">
       <BrowserRouter>
-          <Toolbar/>
+          <Toolbar setScreenName={setScreenName} curScreenName={screenName}/>
           <div id='mainCenter' style={{'display': 'flex','justifyContent': 'center', 'marginTop': '30px'}}>
           <Switch>
             <Route path="/" exact>
@@ -26,7 +28,7 @@ function App() {
               <AddSeries />
             </Route>
             <Route path="/login">
-              <Login />
+              <Login setScreenName={setScreenName}/>
             </Route>
             <Route path="/nextEpisode">
               <NextEpisode />

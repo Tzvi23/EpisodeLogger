@@ -29,6 +29,7 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
     if (props.curUsrName !== 'Guest'){
         console.log('Log out Function!');
+        props.screenName('Log In');
         props.onLogin('Guest', '');
     };
   };
