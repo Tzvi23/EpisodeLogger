@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import * as actionTypes from '../store/actions';
 
-
+import NextEpisodeCard from '../components/nextEpisodeCard/NextEpisodeCard';
 import PleaseLogInButton from '../components/pleaseLogIn/PleaseLogIn';
 
 
@@ -27,14 +27,31 @@ const NextEpisode = (props) => {
         })
     );
   };
+
+
+  // Send request for the logged user to get Series data from the mongo DB
+  if(props.userName !== 'Guest' && JSON.stringify(props.userData) === '{}'){
+    getUserDataCall();
+  }
+
   
-    if(props.userName !== 'Guest' && JSON.stringify(props.userData) === '{}'){
-      getUserDataCall();
-    }
+
+  const nextEpisodeScreenVis = (
+    <div>
+      <h1>Next Episode screen </h1> 
+      <div style={{display: 'flex'}}>
+      {Object.keys(props.userData).map((series, i) => {
+      console.log(props.userData[series])
+      if(props.userData[series].visible === true)
+      return <NextEpisodeCard seriesData={props.userData[series]} key={i}/>
+    })}
+      </div>
+    </div>
+  );
 
     return (
         <div>
-        { props.userName !== 'Guest' ? <h1>Next Episode screen </h1> : <PleaseLogInButton setScreenName={props.setScreenName}/>}
+        { props.userName !== 'Guest' ? nextEpisodeScreenVis : <PleaseLogInButton setScreenName={props.setScreenName}/>}
         </div>
     )
 };
