@@ -242,7 +242,7 @@ def load_all_series(userName):
     name, permalink, DF_episodes_json_str, DF_episodes_json_dict, visible
     """
     if not checkCollection(userName, 'load_all_series'):
-        msg.print_msg(f'[add_series] Collection for {userName} does not exist cannot add series')
+        msg.print_msg(f'[load_all_series] Collection for {userName} does not exist cannot add series')
         return False
 
     seriesDataDict = dict()

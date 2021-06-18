@@ -6,7 +6,7 @@ const AddSeries = (props) => {
 
     return (
         <div>
-        { props.userName !== 'Guest' ? <h1>Watched Screen </h1> : <PleaseLogInButton setScreenName={props.setScreenName}/>}
+        { props.userName !== 'Guest' ? <h1>Add Series Screen </h1> : <PleaseLogInButton setScreenName={props.setScreenName}/>}
         </div>
     )
 };

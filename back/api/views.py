@@ -23,9 +23,11 @@ def loginUser():
         return 'Bad credentials', 401
 
 
-@app.route('/getDataTest')
+@app.route('/getUserData', methods=['POST'])
 def getData():
-    data = manager.load_all_series('tzvi_23')
+    getUserName = request.get_json()
+    print(getUserName)
+    data = manager.load_all_series(userName=getUserName['username'])
     return json.dumps(data)
 
 

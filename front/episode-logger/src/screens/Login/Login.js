@@ -71,11 +71,6 @@ const Login = (props) => {
         </div>
     );
 
-    // const testServer = () => {
-    //     fetch("/getDataTest").then(
-    //         (response) => response.json().then(data => console.log(data))
-    //     );
-    // };
 
     // Logged user or not
     const logForm = (

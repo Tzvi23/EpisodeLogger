@@ -15,6 +15,11 @@ const reducer = (state = initialState, action) =>{
                 userName: action.userName,
                 password: action.password
             };
+        case actionTypes.LOAD_DATA:
+            return {
+                ...state,
+                userData: action.userData
+            };
         default:
             return state;
     };
