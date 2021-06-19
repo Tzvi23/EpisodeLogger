@@ -31,5 +31,20 @@ def getData():
     return json.dumps(data)
 
 
+@app.route('/markWatched', methods=['POST'])
+def markWatched():
+    episodeData = request.get_json()
+    print(episodeData)
+    if manager.updateWatchStatusForSingleEpisode(userName=episodeData['userName'],
+                                                 seriesName=episodeData['seriesName'],
+                                                 season=str(episodeData['season']),
+                                                 episode=str(episodeData['episode']),
+                                                 visStatus=episodeData['visStatus']):
+        return 'Marked Watched', 200
+    else:
+        return 'Failed', 401
+
+
+
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

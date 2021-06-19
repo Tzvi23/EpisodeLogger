@@ -37,7 +37,33 @@ const useStyles = makeStyles({
 
 export default function NextEpisodeCard(props) {
   const classes = useStyles();
-  console.log(props.seriesData)
+  const curUser = props.userName;
+
+  const markWatched = () => {
+    const payLoad = {
+      userName: curUser,
+      seriesName: props.seriesData.name,
+      season: props.seriesData.nextEpisode.season,
+      episode: props.seriesData.nextEpisode.episode,
+      visStatus: true
+    }
+
+    let body = {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payLoad)
+    }
+
+    fetch("/markWatched", body).then(
+      (response) => {
+        if(response.ok){
+          props.refresh(true);
+        }
+      }
+    )
+  };
 
   return (
     
@@ -70,7 +96,7 @@ export default function NextEpisodeCard(props) {
       </CardContent>
         
       <CardActions>
-        <Button size="small">Learn More</Button>
+        <Button size="small" onClick={markWatched}>Mark as watched</Button>
       </CardActions>
       </Grid>
       

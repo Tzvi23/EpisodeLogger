@@ -316,6 +316,8 @@ def updateWatchStatusForSingleEpisode(userName, seriesName, season, episode, vis
 
     msg.print_msg(
         f'[updateWatchStatusForSingleEpisode] Updated watched status to: {visStatus} for series: {seriesName}|S:{season}|E:{episode}')
+
+    updateNextEpisode(userName=userName, seriesName=seriesName)
     return True
 
 
