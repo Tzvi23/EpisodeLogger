@@ -48,6 +48,7 @@ class Series:
             self.setEpisodesToWatched()
         self.convertDFtoJSON()  # set DF_episodes_json
         self.setNextEpisode()
+        return True
 
     def fetch_data(self):
         msg.print_msg('Fetching data')

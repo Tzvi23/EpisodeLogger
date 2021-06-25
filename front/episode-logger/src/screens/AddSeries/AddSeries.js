@@ -7,17 +7,32 @@ import TextField from "@material-ui/core/TextField";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 
+// Back drop imports
+import { makeStyles } from "@material-ui/core/styles";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Backdrop from "@material-ui/core/Backdrop";
+
 import Button from "@material-ui/core/Button";
 
 import cssClasses from "./AddSeries.module.css";
 
+const useStyles = makeStyles((theme) => ({
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: "#fff",
+  },
+}));
+
 const AddSeries = (props) => {
+  const classes = useStyles();
   const [checkBox, setCheckBox] = useState({
     checkedB: true,
   });
   const [seriesName, setSeriesName] = useState("");
   const [permalink, setPermalink] = useState("");
   const [failed, setFailed] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Bind Check box change
   const handleChange = (event) => {
@@ -43,6 +58,8 @@ const AddSeries = (props) => {
       return;
     }
 
+    setLoading(true);
+
     const formData = {
       userName: props.userName,
       seriesName: seriesName,
@@ -62,14 +79,29 @@ const AddSeries = (props) => {
       console.log(response);
       if (response.ok) {
         setFailed(false);
+        setSuccess(true);
       } else if (response.status === 406) {
         setFailed(true);
+        setSuccess(false);
       }
+      setLoading(false);
     });
   };
 
   const badRequest = (
     <div className={cssClasses.errorCard}>Failed to add series</div>
+  );
+
+  const goodRequest = (
+    <div className={cssClasses.successCard}>Added series successfully</div>
+  );
+
+  const loadingBackDrop = (
+    <div>
+      <Backdrop className={classes.backdrop} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+    </div>
   );
 
   const addSeriesScreenConten = (
@@ -122,13 +154,18 @@ const AddSeries = (props) => {
         </div>
       </div>
       {failed ? badRequest : null}
+      {success ? goodRequest : null}
     </div>
   );
 
   return (
     <div>
       {props.userName !== "Guest" ? (
-        addSeriesScreenConten
+        loading ? (
+          loadingBackDrop
+        ) : (
+          addSeriesScreenConten
+        )
       ) : (
         <PleaseLogInButton setScreenName={props.setScreenName} />
       )}
