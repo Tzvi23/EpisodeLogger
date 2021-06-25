@@ -41,7 +41,8 @@ class Series:
 
     def initialize(self, watched=False):
         # self.fetch_data() currently disabled
-        self.fetch_data_once()
+        if not self.fetch_data_once():
+            return False
         self.adjustTimeZoneToEst()
         if watched:
             self.setEpisodesToWatched()
@@ -56,9 +57,14 @@ class Series:
         self.lastDbUpdate = datetime.datetime.now()
         # Extract data
         data = r.json()
+        # Check for data
+        if len(data) == 1:
+            msg.print_msg('[fetch_data] Failed to retrieve Data', error=1)
+            return False
         self.data = data['tvShow']
         self.countDown = self.data['countdown']
         msg.print_msg('Done')
+        return True
 
     def fetch_data_once(self):
         """
@@ -75,6 +81,10 @@ class Series:
             self.lastDbUpdate = datetime.datetime.now()
             # Extract data
             data = r.json()
+            # Check for data
+            if len(data) == 1:
+                msg.print_msg('[fetch_data_once] Failed to retrieve Data', error=1)
+                return False
             # Write to pickle file
             with open(self.name + '.pickle', 'wb') as f:
                 pickle.dump(r.json(), f)
@@ -89,6 +99,7 @@ class Series:
         self.DF_episodes['watched'] = False  # Add column of watched status
         self.countDown = self.data['countdown']
         msg.print_msg('Done')
+        return True
 
     def adjustTimeZoneToEst(self):
         """

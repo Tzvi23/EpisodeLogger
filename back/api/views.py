@@ -45,6 +45,19 @@ def markWatched():
         return 'Failed', 401
 
 
+@app.route('/addSeries', methods=['POST'])
+def addSeries():
+    seriesToAdd = request.get_json()
+    print(seriesToAdd)
+    if manager.add_series(userName=seriesToAdd['userName'],
+                          seriesName=seriesToAdd['seriesName'],
+                          seriesPermalink=seriesToAdd['seriesPermalink'],
+                          watched=seriesToAdd['watched']):
+        return 'Series Add', 200
+    else:
+        return 'Failed to add Series', 406
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

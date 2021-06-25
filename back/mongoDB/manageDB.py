@@ -189,10 +189,13 @@ def add_series(userName, seriesName, seriesPermalink, watched=False):
         return False
     else:
         newSeriesObj = Series(name=seriesName, permaLink=seriesPermalink)
-        newSeriesObj.initialize(watched)
+        if not newSeriesObj.initialize(watched):
+            return False
         newSeriesObjDict = newSeriesObj.__dict__
         del newSeriesObjDict['DF_episodes']
-        newSeriesObjDict['nextEpisode'] = convertNextEpisodeData(newSeriesObjDict['nextEpisode'])
+        # If all the episodes marked as watched set the nextEpisode to None
+        if newSeriesObjDict['nextEpisode'] is not None:
+            newSeriesObjDict['nextEpisode'] = convertNextEpisodeData(newSeriesObjDict['nextEpisode'])
         userCol.insert_one(newSeriesObjDict)
         msg.print_msg(f'New series added! Collection: {userName} | Series: {seriesName}')
         return True
