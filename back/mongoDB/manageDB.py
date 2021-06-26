@@ -251,7 +251,7 @@ def load_all_series(userName):
     seriesDataDict = dict()
     userCol = startupClient[DATABASE_NAME][userName]  # Get collection cursor
     for series in userCol.find({},
-                               {"_id": 0, "lastDbUpdate": 0, "episodes": 0, "data": 0, "countDown": 0, "watched": 0, "DF_episodes_json_str": 0}):
+                               {"_id": 0, "lastDbUpdate": 0, "episodes": 0, "countDown": 0, "watched": 0, "DF_episodes_json_str": 0}):
         msg.print_msg(f"[load_all_series] Adding {series['name']} to list for user {userName}")
         seriesDataDict[series['name']] = series
     return seriesDataDict
