@@ -5,8 +5,6 @@ import PleaseLogInButton from "../components/pleaseLogIn/PleaseLogIn";
 import WatchedSeriesCard from "../components/watchedSeriesCard/WatchedSeriesCard";
 
 const Watched = (props) => {
-  console.log(props.userData);
-
   const watchedScreenContent = (
     <div
       style={{ display: "flex", flexFlow: "wrap", justifyContent: "center" }}

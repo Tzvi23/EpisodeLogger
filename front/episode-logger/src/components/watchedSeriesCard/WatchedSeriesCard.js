@@ -7,6 +7,8 @@ import CardMedia from "@material-ui/core/CardMedia";
 import Typography from "@material-ui/core/Typography";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 
+import { Link } from "react-router-dom";
+
 const useStyles = makeStyles({
   root: {
     maxWidth: 345,
@@ -23,7 +25,7 @@ export default function WatchedSeriesCard(props) {
 
   return (
     <Card className={classes.root}>
-      <CardActionArea>
+      <CardActionArea component={Link} to={"/watched/" + props.seriesName}>
         <CardMedia
           className={classes.media}
           image={props.seriesImg}

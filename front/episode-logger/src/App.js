@@ -9,6 +9,7 @@ import NextEpisode from "./screens/NextEpisode";
 import RemoveSeries from "./screens/RemoveSeries";
 import Watched from "./screens/Watched";
 import UpdateSeries from "./screens/UpdateSeries";
+import WatchedData from "./screens/WatchedData";
 
 import Toolbar from "./components/toolbar/Toolbar";
 
@@ -42,6 +43,9 @@ function App() {
             </Route>
             <Route path="/removeSeries">
               <RemoveSeries setScreenName={setScreenName} />
+            </Route>
+            <Route path="/watched/:seriesname">
+              <WatchedData />
             </Route>
             <Route path="/watched">
               <Watched setScreenName={setScreenName} />
